@@ -11541,13 +11541,13 @@ tf.range(start, limit, delta) ==> [3, 6, 9, 12, 15]
   }];
 
   let arguments = (ins
-    Arg<TensorOf<[TF_Bfloat16, TF_Float16, TF_Float32, TF_Float64, TF_Int16, TF_Int32, TF_Int64, TF_Int8, TF_Uint32]>, [{0-D (scalar). First entry in the sequence.}]>:$start,
-    Arg<TensorOf<[TF_Bfloat16, TF_Float16, TF_Float32, TF_Float64, TF_Int16, TF_Int32, TF_Int64, TF_Int8, TF_Uint32]>, [{0-D (scalar). Upper limit of sequence, exclusive.}]>:$limit,
-    Arg<TensorOf<[TF_Bfloat16, TF_Float16, TF_Float32, TF_Float64, TF_Int16, TF_Int32, TF_Int64, TF_Int8, TF_Uint32]>, [{0-D (scalar). Optional. Default is 1. Number that increments `start`.}]>:$delta
+    Arg<TensorOf<[TF_Bfloat16, TF_Float16, TF_Float32, TF_Float64, TF_Int16, TF_Int32, TF_Int64, TF_Int8, TF_Uint16, TF_Uint32]>, [{0-D (scalar). First entry in the sequence.}]>:$start,
+    Arg<TensorOf<[TF_Bfloat16, TF_Float16, TF_Float32, TF_Float64, TF_Int16, TF_Int32, TF_Int64, TF_Int8, TF_Uint16, TF_Uint32]>, [{0-D (scalar). Upper limit of sequence, exclusive.}]>:$limit,
+    Arg<TensorOf<[TF_Bfloat16, TF_Float16, TF_Float32, TF_Float64, TF_Int16, TF_Int32, TF_Int64, TF_Int8, TF_Uint16, TF_Uint32]>, [{0-D (scalar). Optional. Default is 1. Number that increments `start`.}]>:$delta
   );
 
   let results = (outs
-    Res<TensorOf<[TF_Bfloat16, TF_Float16, TF_Float32, TF_Float64, TF_Int16, TF_Int32, TF_Int64, TF_Int8, TF_Uint32]>, [{1-D.}]>:$output
+    Res<TensorOf<[TF_Bfloat16, TF_Float16, TF_Float32, TF_Float64, TF_Int16, TF_Int32, TF_Int64, TF_Int8, TF_Uint16, TF_Uint32]>, [{1-D.}]>:$output
   );
 
   TF_DerivedOperandTypeAttr Tidx = TF_DerivedOperandTypeAttr<0>;
@@ -18607,7 +18607,7 @@ https://www.tensorflow.org/api_docs/python/tf/tensor_scatter_nd_update) function
 
   let arguments = (ins
     Arg<TF_Tensor, [{Tensor to copy/update.}]>:$tensor,
-    Arg<TensorOf<[TF_Int16, TF_Int32, TF_Int64]>, [{Index tensor.}]>:$indices,
+    Arg<TensorOf<[TF_Int16, TF_Int32, TF_Int64, TF_Uint16]>, [{Index tensor.}]>:$indices,
     Arg<TF_Tensor, [{Updates to scatter into output.}]>:$updates
   );
 
@@ -19875,7 +19875,7 @@ containing only non-negative values.}]>:$padding_interior
   TF_DerivedOperandTypeAttr Tindices = TF_DerivedOperandTypeAttr<2>;
 }
 
-def TF_XlaRecvFromHostOp : TF_Op<"XlaRecvFromHost", [TF_SendRecvSideEffect]> {
+def TF_XlaRecvFromHostOp : TF_Op<"XlaRecvFromHost", [TF_RecvSideEffect]> {
   let summary = "An op to receive a tensor from the host.";
 
   let description = [{
@@ -20117,7 +20117,7 @@ eigenvalue w[..., i].}]>:$v
   TF_DerivedOperandTypeAttr T = TF_DerivedOperandTypeAttr<0>;
 }
 
-def TF_XlaSendToHostOp : TF_Op<"XlaSendToHost", [TF_SendRecvSideEffect]> {
+def TF_XlaSendToHostOp : TF_Op<"XlaSendToHost", [TF_SendSideEffect]> {
   let summary = "An op to send a tensor to the host.";
 
   let description = [{
@@ -20757,7 +20757,7 @@ expected to create these operators.
   TF_DerivedOperandTypeAttr T = TF_DerivedOperandTypeAttr<0>;
 }
 
-def TF__XlaHostComputeMlirOp : TF_Op<"_XlaHostComputeMlir", [TF_SendRecvSideEffect]> {
+def TF__XlaHostComputeMlirOp : TF_Op<"_XlaHostComputeMlir", [TF_RecvSideEffect, TF_SendSideEffect]> {
   let summary = [{
 A pseudo-op to represent host-side computation in an XLA program.
   }];
@@ -20785,7 +20785,7 @@ A pseudo-op to represent host-side computation in an XLA program.
   let verifier = [{ return Verify(*this); }];
 }
 
-def TF__XlaRecvAtHostOp : TF_Op<"_XlaRecvAtHost", [TF_SendRecvSideEffect]> {
+def TF__XlaRecvAtHostOp : TF_Op<"_XlaRecvAtHost", [DeclareOpInterfaceMethods<TF_GetResourceInstanceInterface>, TF_RecvSideEffect]> {
   let summary = [{
 A placeholder op to receive values from a running XLA computation.
   }];
@@ -20805,7 +20805,7 @@ execution the transfer corresponds to.}]>:$dynamic_key,
   TF_DerivedResultTypeListAttr Toutputs = TF_DerivedResultTypeListAttr<0>;
 }
 
-def TF__XlaRecvAtHostV2Op : TF_Op<"_XlaRecvAtHostV2", [TF_SendRecvSideEffect]> {
+def TF__XlaRecvAtHostV2Op : TF_Op<"_XlaRecvAtHostV2", [DeclareOpInterfaceMethods<TF_GetResourceInstanceInterface>, TF_RecvSideEffect]> {
   let summary = [{
 A placeholder op to receive values from a running XLA computation with support for a runtime device ordinal.
   }];
@@ -20825,7 +20825,7 @@ execution the transfer corresponds to.}]>:$dynamic_key,
   TF_DerivedResultTypeListAttr Toutputs = TF_DerivedResultTypeListAttr<0>;
 }
 
-def TF__XlaSendFromHostOp : TF_Op<"_XlaSendFromHost", [TF_SendRecvSideEffect]> {
+def TF__XlaSendFromHostOp : TF_Op<"_XlaSendFromHost", [DeclareOpInterfaceMethods<TF_GetResourceInstanceInterface>, TF_SendSideEffect]> {
   let summary = "A placeholder op to send values to a running XLA computation.";
 
   let arguments = (ins
@@ -20842,7 +20842,7 @@ execution the transfer corresponds to.}]>:$dynamic_key,
   TF_DerivedOperandTypeListAttr Tinputs = TF_DerivedOperandTypeListAttr<0>;
 }
 
-def TF__XlaSendFromHostV2Op : TF_Op<"_XlaSendFromHostV2", [TF_SendRecvSideEffect]> {
+def TF__XlaSendFromHostV2Op : TF_Op<"_XlaSendFromHostV2", [DeclareOpInterfaceMethods<TF_GetResourceInstanceInterface>, TF_SendSideEffect]> {
   let summary = [{
 A placeholder op to send values to a running XLA computation with support for a runtime device ordinal.
   }];
